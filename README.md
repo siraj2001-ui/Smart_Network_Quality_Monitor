@@ -14,7 +14,7 @@ Pipeline: `CSV -> Pandas cleaning -> classification -> Flask REST API -> dashboa
 # Network Quality Rule-Based Classification Module
 
 ## Purpose
-Classify each customer measurement record using **fixed project requirements**, not machine learning. The API teammate can import `analyze_customer` from `quality_rules.py`.
+Classify each customer measurement record using **fixed project requirements**, not machine learning.
 
 ## Inputs and per-metric thresholds
 
