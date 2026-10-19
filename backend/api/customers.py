@@ -1,4 +1,6 @@
 
+import json
+
 from flask import Blueprint, jsonify, request
 
 from service import get_classified_customers
@@ -45,6 +47,15 @@ def customers():
         na_position="last"
     )
 
-    records = df.to_dict(orient="records")
+    df = df.copy()
+
+    df["timestamp"] = df["timestamp"].dt.strftime(
+        "%Y-%m-%dT%H:%M:%S"
+    )
+
+    # to_json turns NaN into null, so invalid rows stay valid JSON
+    records = json.loads(
+        df.to_json(orient="records")
+    )
 
     return jsonify(records)

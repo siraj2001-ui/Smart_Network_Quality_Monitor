@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Smart Network Quality Monitor</title>
+<link rel="stylesheet" href="css/styles.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="js/app.js" defer></script>
+</head>
+<body>
+<nav>
+ <h1>Smart Network Quality Monitor<small id="upd">Loading data…</small></h1>
+ <div class="tabs"><button class="tab" data-p="overview">Overview</button><button class="tab" data-p="customers">Customers</button></div>
+ <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">Dark mode</button>
+ <div class="health" id="health" title="Backend /api/health"><span class="dot"></span><span id="healthText">System Status: checking…</span></div>
+</nav>
+
+<main class="wrap">
+<div class="apiError" id="apiError" role="alert" hidden></div>
+
+<section id="overview">
+ <div class="kpis" id="kpis"></div>
+ <div class="card hero"><h2>Libya severity heatmap</h2><p>Districts with customers are shaded by average Priority Score (0–8, darker means more critical). Districts without data stay white. Select a district for details.</p>
+  <div class="hero2">
+   <div class="mf"><svg id="map" viewBox="0 0 700 710" role="group" aria-label="Libya severity heatmap by district"><g id="regions"></g><g id="callouts"></g></svg>
+    <div class="lgd"><b>Avg Priority Score</b><div class="lgb"><i></i><span><em>8</em><em>6</em><em>4</em><em>2</em><em>0</em></span></div></div></div>
+   <div class="info" id="minfo">Select a district to see its severe cases and average Priority Score.</div>
+  </div></div>
+ <div class="card" style="margin-top:12px"><h2>Network health</h2><p>Average of the latest readings across all customers</p><div class="trendIndicator" id="healthTrend" aria-live="polite"></div><div class="tiles" id="tiles"></div></div>
+ <div class="card attentionCard"><div class="sectionHead"><h2>Needs attention</h2><span class="meta" id="attentionSummary"></span></div><p>Customers ranked by severity and priority score.</p><div class="attentionList" id="attentionList"></div></div>
+</section>
+
+<section id="customers" hidden>
+ <div class="bar filterBar">
+  <label class="searchField">Search customer<input id="q" placeholder="Search by ID, city, or profile"></label>
+  <label class="sortField">Sort<select id="sort"><option value="prio">Priority score</option><option value="lat">Latency</option><option value="loss">Packet loss</option><option value="id">Customer ID</option></select></label>
+  <button class="btn filterOpen" id="filterOpen" type="button" aria-haspopup="dialog">Filter <span id="filterCount"></span></button>
+  <select id="city" hidden></select><select id="sev" hidden></select><select id="prof" hidden></select>
+ </div>
+ <div class="activeFilters" id="activeFilters"></div><div class="customerSummary" id="customerSummary" aria-live="polite"></div>
+ <div class="meta" id="count"></div>
+ <div class="tw"><table>
+ <thead><tr><th>Customer ID</th><th>City</th><th>Profile</th><th class="r">Latency (ms)</th><th class="r">Throughput (Mbps)</th><th class="r">Packet Loss (%)</th><th class="r">Congestion (%)</th><th>Severity</th><th class="r">Priority Score</th><th>Issues</th><th>Details</th></tr></thead>
+ <tbody id="rows"></tbody></table></div>
+ <div class="pagination" id="pagination" aria-label="Customer results pagination"></div>
+ <div class="meta">Select a row to open that customer’s reading history.</div>
+</section>
+
+<div class="filterModal" id="filterModal" hidden>
+ <div class="filterScrim" id="filterScrim"></div>
+ <section class="filterDialog" role="dialog" aria-modal="true" aria-labelledby="filterTitle">
+  <div class="filterHeader"><div><h2 id="filterTitle">Filter customers</h2><p>Shape the list around the signals you want to inspect.</p></div><button class="closeFilter" id="filterClose" type="button" aria-label="Close filters">×</button></div>
+  <div class="filterBody">
+   <div class="filterBlock"><h3>City</h3><div class="chips" id="cityFilters"></div></div>
+   <div class="filterBlock"><h3>Severity</h3><div class="severityScale"><input id="severityRange" type="range" min="0" max="4" step="1" value="0"><div class="scaleLabels"><span>All</span><span>Normal</span><span>Monitor</span><span>Severe</span><span>Invalid</span></div><strong id="severityValue">All severities</strong></div></div>
+   <div class="filterBlock"><h3>Profile</h3><div class="chips" id="profFilters"></div></div>
+  </div>
+  <div class="filterFooter"><span class="filterMatch" id="filterMatch" aria-live="polite"></span><button class="btn" id="filterClear" type="button">Clear filters</button><button class="btn applyFilters" id="filterApply" type="button">Apply filters</button></div>
+ </section>
+</div>
+
+<section id="customer" hidden>
+ <div class="stack">
+ <div class="card"><div class="ctl"><div><button class="btn" id="back">Back to customers</button></div>
+  <label>Reading<select id="ts"></select></label><div class="rangeControl" role="group" aria-label="Chart time range"><span>Chart window</span><button type="button" class="rangeBtn active" data-range="24" aria-pressed="true">Latest 24 hours</button><button type="button" class="rangeBtn" data-range="72" aria-pressed="false">Latest 72 hours</button></div></div>
+  <div class="facts" id="cinfo" style="margin:14px 0 0"></div></div>
+ <div class="story" id="story"></div>
+ <div class="grid g2">
+  <div class="card chartCard"><div class="chartNote"><h2>Latency story</h2><strong>Lower is better</strong></div><p>Watch for spikes above 60 ms, then 100 ms.</p><div class="chartLegend" aria-label="Latency thresholds"><span><i class="legendMonitor"></i>Monitor above 60 ms</span><span><i class="legendSevere"></i>Severe above 100 ms</span></div><div class="cv t"><canvas id="c4" role="img" aria-label="Latency over time"></canvas></div><div class="chartReadout" id="readout-c4"></div></div>
+  <div class="card chartCard"><div class="chartNote"><h2>Throughput</h2><strong>Higher is better</strong></div><p>Column height shows the available bandwidth at each reading.</p><div class="chartLegend" aria-label="Throughput thresholds"><span><i class="legendNormal"></i>Normal from 10 Mbps</span><span><i class="legendMonitor"></i>Monitor below 10 Mbps</span><span><i class="legendSevere"></i>Severe below 5 Mbps</span></div><div class="cv t"><canvas id="c5" role="img" aria-label="Throughput readings over time"></canvas></div><div class="chartReadout" id="readout-c5"></div></div>
+  <div class="card chartCard"><div class="chartNote"><h2>Packet loss signal</h2><strong>Lower is better</strong></div><p>Read the loss trace like a network test: spikes above 1% need attention, above 3% are severe.</p><div class="chartLegend" aria-label="Packet loss thresholds"><span><i class="legendNormal"></i>Normal up to 1%</span><span><i class="legendMonitor"></i>Monitor above 1%</span><span><i class="legendSevere"></i>Severe above 3%</span></div><div class="cv t"><canvas id="c6" role="img" aria-label="Packet loss signal over time"></canvas></div><div class="chartReadout" id="readout-c6"></div></div>
+  <div class="card chartCard"><div class="chartNote"><h2>Congestion cycle</h2><strong>One slice per reading</strong></div><p>Radial size shows pressure across the selected customer’s recorded period.</p><div class="chartScaleNote">Scale: 0% at the center · 100% at the outer ring</div><div class="chartLegend" aria-label="Congestion thresholds"><span><i class="legendNormal"></i>Normal up to 70%</span><span><i class="legendMonitor"></i>Monitor above 70%</span><span><i class="legendSevere"></i>Severe above 85%</span></div><div class="cv t"><canvas id="c7" role="img" aria-label="Congestion cycle over time"></canvas></div><div class="chartReadout" id="readout-c7"></div></div>
+ </div>
+ <div class="card"><h2>Classification Reasons</h2><p>For the selected reading</p><ul id="why"></ul></div>
+ </div>
+</section>
+</main>
+</body>
+</html>
