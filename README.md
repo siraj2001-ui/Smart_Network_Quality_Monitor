@@ -18,7 +18,7 @@ Classify each customer measurement record using **fixed project requirements**, 
 
 ## Inputs and per-metric thresholds
 
-| Metric | Normal (0 pts) | Monitor (1 pt) | Severe (3 pts) |
+| Metric | Normal  | Monitor  | Severe  |
 |---|---|---|---|
 | `latency_ms` | ≤ 60 | >60 to ≤100 | >100 |
 | `packet_loss_pct` | ≤ 1 | >1 to ≤3 | >3 |
