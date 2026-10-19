@@ -31,17 +31,7 @@ Priority score is the sum of all four per-metric points, from 0 to 12.
 
 Missing values, nonnumeric values, booleans, infinity, NaN, negative values, and percentages above 100 are invalid. All measurements must be present. Numeric strings are accepted. These validation conventions should be confirmed with the team if API input contracts differ.
 
-## Usage
 
-```python
-from quality_rules import analyze_customer
-customer = {'latency_ms': 125, 'packet_loss_pct': 4.2,
-            'throughput_mbps': 15, 'congestion_pct': 60}
-result = analyze_customer(customer)
-# {'severity': 'Severe', 'priority_score': 6, 'reasons': [...actual measurements...]}
-```
-
-No Flask, training, model weights, or pandas dependency is required.
 
 ## Tests
 
