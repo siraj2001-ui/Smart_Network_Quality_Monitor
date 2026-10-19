@@ -1,4 +1,6 @@
 
+from pathlib import Path
+
 import pandas as pd
 
 from quality_rules import (
@@ -8,9 +10,22 @@ from quality_rules import (
 )
 
 
+DATA_FILE = Path(__file__).resolve().parent / "network_metrics_cleanedd.csv"
+
+
 def load_measurements():
-    df = pd.read_csv("network_metrics_cleanedd.csv")
+    df = pd.read_csv(DATA_FILE)
     return df
+
+
+def get_previous_measurements():
+    df = load_measurements()
+
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+    df = df.sort_values("timestamp")
+
+    return df.groupby("customer_id").nth(-2)
 
 
 def get_latest_measurements():
