@@ -31,18 +31,3 @@ Priority score is the sum of all four per-metric points, from 0 to 12.
 
 Missing values, nonnumeric values, booleans, infinity, NaN, negative values, and percentages above 100 are invalid. All measurements must be present. Numeric strings are accepted. These validation conventions should be confirmed with the team if API input contracts differ.
 
-
-
-## Tests
-
-From the folder containing both Python files, run:
-
-```bash
-python3 -m unittest -v test_quality_rules.py
-```
-
-Tests cover Normal, Monitor, Severe, Invalid, threshold boundaries, dynamic explanations, and the important distinction between per-metric severity and final score-based severity.
-
-## Integration contract
-
-`analyze_customer(customer)` takes a dictionary-like object with the four named metrics and returns a JSON-serializable dictionary with `severity` (string), `priority_score` (integer or `None`), and `reasons` (list of strings). The API owner handles HTTP routing and status codes separately.
